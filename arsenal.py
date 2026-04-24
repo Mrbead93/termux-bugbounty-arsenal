@@ -306,11 +306,8 @@ def module_js_scanner():
     findings = []
     section("FETCHING JS FILES")
     try:
-        stop = threading.Event()
-        t = threading.Thread(target=progress_bar, args=(stop,"Fetching page",5))
-        t.start()
+        info("Fetching page...")
         r = requests.get(url, timeout=10, headers=headers)
-        stop.set(); t.join()
         js_urls = extract_js_urls(url, r.text)
         ok(f"Found {len(js_urls)} JS files")
     except Exception as e:
@@ -573,12 +570,9 @@ def module_evidence_collector():
     if choice == "1":
         eps = input("  Endpoints (comma separated, Enter for /): ").strip() or "/"
         for ep in [e.strip() for e in eps.split(",")]:
-            stop = threading.Event()
-            t = threading.Thread(target=progress_bar, args=(stop,f"Capturing {ep}",5))
-            t.start()
             try:
+                info(f"Capturing {ep}...")
                 r = requests.get(f"{url}{ep}", timeout=10, headers={"User-Agent":"Mozilla/5.0"})
-                stop.set(); t.join()
                 p = os.path.join(out_dir, f"headers{ep.replace('/','_')}.txt")
                 with open(p,"w") as f:
                     f.write(f"URL: {url}{ep}\nStatus: {r.status_code}\n\n=== HEADERS ===\n")
@@ -588,12 +582,9 @@ def module_evidence_collector():
 
     elif choice == "2":
         ep = input("  Endpoint (default /): ").strip() or "/"
-        stop = threading.Event()
-        t = threading.Thread(target=progress_bar, args=(stop,f"Capturing {ep}",8))
-        t.start()
         try:
+            info(f"Capturing {ep}...")
             r = requests.get(f"{url}{ep}", timeout=10, headers={"User-Agent":"Mozilla/5.0"})
-            stop.set(); t.join()
             p = os.path.join(out_dir, f"response{ep.replace('/','_')}.html")
             open(p,"w").write(r.text)
             ok(f"Saved → {p}")
@@ -663,11 +654,8 @@ def full_automated_chain():
     headers = {"User-Agent":"Mozilla/5.0"}
     js_findings = []
     try:
-        stop = threading.Event()
-        t = threading.Thread(target=progress_bar, args=(stop,"Fetching page",5))
-        t.start()
+        info("Fetching page for JS scan...")
         r = requests.get(url, timeout=10, headers=headers)
-        stop.set(); t.join()
         js_urls = extract_js_urls(url, r.text)
         ok(f"Found {len(js_urls)} JS files")
         for i,js_url in enumerate(js_urls,1):
@@ -713,9 +701,7 @@ def generate_report(target=None, out_dir=None):
     if not out_dir:
         out_dir = os.path.join(ARSENAL_DIR,"reports",target)
     os.makedirs(out_dir, exist_ok=True)
-    stop = threading.Event()
-    t = threading.Thread(target=progress_bar, args=(stop,"Building report",3))
-    t.start()
+    info("Building report...")
 
     def rf(name):
         p = os.path.join(out_dir,name)
@@ -777,7 +763,6 @@ def generate_report(target=None, out_dir=None):
             f.writelines(subdomains[:30]); f.write("```\n\n")
         f.write("---\n*Termux Bug Bounty Arsenal v5.0 — Authorised testing only*\n")
 
-    stop.set(); t.join()
     ok(f"Report saved → {fp}")
     pause()
 
