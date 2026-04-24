@@ -1,0 +1,14 @@
+# Ignore generated files and reports
+reports/
+*.txt
+*.json
+nuclei_results.txt
+subdomains.txt
+alive.txt
+ports.txt
+directories.txt
+parameters.txt
+endpoints.txt
+ffuf.json
+__pycache__/
+*.pyc
